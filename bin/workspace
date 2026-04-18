@@ -56,6 +56,8 @@ cmd_sync() {
 }
 
 cmd_show() {
+  [ "$#" -eq 1 ] || die "Usage: workspace show <path>"
+
   local workspace_path="${1:-}"
   local profile
   local repo
@@ -74,12 +76,15 @@ cmd_show() {
 }
 
 cmd_doctor() {
+  [ "$#" -eq 1 ] || die "Usage: workspace doctor <path>"
+
   local workspace_path="${1:-}"
   local profile
 
   [ -n "$workspace_path" ] || die "Usage: workspace doctor <path>"
   profile="$(read_profile_metadata "$workspace_path")"
   profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  ensure_workspace_paths_exist
   doctor_profile_links "$workspace_path" "$profile"
 }
 

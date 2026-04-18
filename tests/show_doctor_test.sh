@@ -39,3 +39,35 @@ assert_exit_code "$doctor_status" 1
 assert_contains "$doctor_output" "OK: iris-auth"
 assert_contains "$doctor_output" "ERROR: wrong symlink target for iris-admin-ui"
 assert_contains "$doctor_output" "WARNING: missing repo source $tmp_dir/repos/iris-finance"
+
+set +e
+show_extra_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/workspaces.yaml" "$REPO_ROOT/bin/workspace" show "$tmp_dir/workspaces/ticket-123" extra 2>&1)"
+show_extra_status=$?
+set -e
+
+assert_exit_code "$show_extra_status" 1
+assert_contains "$show_extra_output" "Usage: workspace show <path>"
+
+set +e
+doctor_extra_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/workspaces.yaml" "$REPO_ROOT/bin/workspace" doctor "$tmp_dir/workspaces/ticket-123" extra 2>&1)"
+doctor_extra_status=$?
+set -e
+
+assert_exit_code "$doctor_extra_status" 1
+assert_contains "$doctor_extra_output" "Usage: workspace doctor <path>"
+
+cat >"$tmp_dir/missing-repos.yaml" <<EOF
+base_repo_dir: $tmp_dir/repos-missing
+workspace_root: $tmp_dir/workspaces
+profiles:
+  iris:
+    - iris-auth
+EOF
+
+set +e
+doctor_missing_base_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/missing-repos.yaml" "$REPO_ROOT/bin/workspace" doctor "$tmp_dir/workspaces/ticket-123" 2>&1)"
+doctor_missing_base_status=$?
+set -e
+
+assert_exit_code "$doctor_missing_base_status" 1
+assert_contains "$doctor_missing_base_output" "base_repo_dir does not exist"
