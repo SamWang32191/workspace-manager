@@ -6,6 +6,16 @@ workspace_path_from_name() {
   printf '%s/%s\n' "$(workspace_root)" "$name"
 }
 
+ensure_valid_workspace_name() {
+  local name="$1"
+
+  case "$name" in
+    .|..|*/*)
+      die "Invalid workspace name: $name"
+      ;;
+  esac
+}
+
 metadata_file() {
   local workspace_path="$1"
   printf '%s/.workspace-profile\n' "$workspace_path"

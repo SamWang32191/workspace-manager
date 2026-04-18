@@ -18,6 +18,8 @@ cmd_list_profiles() {
 }
 
 cmd_create() {
+  [ "$#" -eq 3 ] || die "Usage: workspace create <name> --profile <profile>"
+
   local name="${1:-}"
   local flag="${2:-}"
   local profile="${3:-}"
@@ -26,6 +28,7 @@ cmd_create() {
   [ -n "$name" ] || die "Usage: workspace create <name> --profile <profile>"
   [ "$flag" = "--profile" ] || die "Usage: workspace create <name> --profile <profile>"
   [ -n "$profile" ] || die "Usage: workspace create <name> --profile <profile>"
+  ensure_valid_workspace_name "$name"
   profile_exists "$profile" || die "Unknown profile: $profile"
 
   workspace_path="$(workspace_path_from_name "$name")"

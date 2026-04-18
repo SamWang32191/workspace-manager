@@ -50,12 +50,19 @@ def require_repo_names(repos, profile)
   invalid_config("profile [#{profile}] repos must contain non-empty strings")
 end
 
+def require_unique_repos(repos, profile)
+  return repos if repos.uniq.length == repos.length
+
+  invalid_config("profile [#{profile}] repos must not contain duplicates")
+end
+
 def require_profiles(profiles)
   profiles = require_profile_keys(profiles)
 
   profiles.each do |profile, repos|
     repos = require_list(repos, "profile [#{profile}] repos")
-    require_repo_names(repos, profile)
+    repos = require_repo_names(repos, profile)
+    require_unique_repos(repos, profile)
   end
 
   profiles
@@ -84,6 +91,7 @@ when 'profile-repos'
   repos = profiles[profile]
   repos = require_list(repos, "profile [#{profile}] repos")
   repos = require_repo_names(repos, profile)
+  repos = require_unique_repos(repos, profile)
   puts repos
 when 'base-repo-dir'
   puts require_string(fetch_required(config, 'base_repo_dir', 'base_repo_dir must be a string'), 'base_repo_dir')
