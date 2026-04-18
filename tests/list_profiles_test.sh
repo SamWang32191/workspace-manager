@@ -66,3 +66,37 @@ set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on malformed YAML"
 assert_contains "$output" "Psych::SyntaxError"
+
+cat >"$tmp_dir/invalid_profiles_type.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  - iris
+EOF
+
+set +e
+output="$(ruby "$REPO_ROOT/scripts/config_query.rb" "$tmp_dir/invalid_profiles_type.yaml" list-profiles 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected list-profiles to fail on non-mapping profiles"
+assert_contains "$output" "Invalid config: profiles must be a mapping"
+
+cat >"$tmp_dir/invalid_profile_repos.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  iris: iris-auth
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/invalid_profile_repos.yaml" bash -c 'set -euo pipefail
+REPO_ROOT="$1"
+source "$REPO_ROOT/lib/common.sh"
+source "$REPO_ROOT/lib/config.sh"
+profile_exists iris' _ "$REPO_ROOT" 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected profile_exists to fail on non-list profile repos"
+assert_contains "$output" "Invalid config: profile [iris] repos must be a list"
