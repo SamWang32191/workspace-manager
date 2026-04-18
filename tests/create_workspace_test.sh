@@ -9,6 +9,7 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 mkdir -p "$tmp_dir/repos/iris-auth" "$tmp_dir/repos/iris-admin-ui"
+mkdir -p "$tmp_dir/root/workspaces"
 
 cat >"$tmp_dir/workspaces.yaml" <<EOF
 base_repo_dir: $tmp_dir/repos
@@ -72,3 +73,38 @@ assert_exit_code "$status" 1
 assert_contains "$output" "Invalid config: profile [iris] repos must not contain duplicates"
 [ ! -e "$tmp_dir/root/workspaces/dup-case" ] || fail "expected create to fail before creating workspace for duplicate repos"
 [ ! -e "$tmp_dir/repos/iris-auth/iris-auth" ] || fail "expected duplicate repo config to avoid polluting base repo dir"
+
+cat >"$tmp_dir/missing-workspace-root.yaml" <<EOF
+base_repo_dir: $tmp_dir/repos
+workspace_root: $tmp_dir/missing-root/workspaces
+profiles:
+  iris:
+    - iris-auth
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/missing-workspace-root.yaml" "$REPO_ROOT/bin/workspace" create no-root --profile iris 2>&1)"
+status=$?
+set -e
+
+assert_exit_code "$status" 1
+assert_contains "$output" "workspace_root"
+[ ! -e "$tmp_dir/missing-root/workspaces/no-root" ] || fail "expected create to fail before creating workspace when workspace_root is missing"
+
+cat >"$tmp_dir/missing-base-repo-dir.yaml" <<EOF
+base_repo_dir: $tmp_dir/missing-repos
+workspace_root: $tmp_dir/root/workspaces
+profiles:
+  iris:
+    - iris-auth
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/missing-base-repo-dir.yaml" "$REPO_ROOT/bin/workspace" create missing-base --profile iris 2>&1)"
+status=$?
+set -e
+
+assert_exit_code "$status" 1
+assert_contains "$output" "base_repo_dir"
+[ ! -e "$tmp_dir/root/workspaces/missing-base" ] || fail "expected create to fail before creating workspace when base_repo_dir is missing"
+[ ! -e "$tmp_dir/root/workspaces/missing-base/.workspace-profile" ] || fail "expected create to avoid writing metadata when base_repo_dir is missing"

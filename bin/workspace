@@ -30,6 +30,7 @@ cmd_create() {
   [ -n "$profile" ] || die "Usage: workspace create <name> --profile <profile>"
   ensure_valid_workspace_name "$name"
   profile_exists "$profile" || die "Unknown profile: $profile"
+  ensure_workspace_paths_exist
 
   workspace_path="$(workspace_path_from_name "$name")"
   ensure_new_workspace_dir "$workspace_path"

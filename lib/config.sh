@@ -53,3 +53,15 @@ base_repo_dir() {
 workspace_root() {
   config_query workspace-root
 }
+
+ensure_existing_directory() {
+  local path="$1"
+  local label="$2"
+
+  [ -d "$path" ] || die "Invalid config: $label does not exist: $path"
+}
+
+ensure_workspace_paths_exist() {
+  ensure_existing_directory "$(workspace_root)" "workspace_root"
+  ensure_existing_directory "$(base_repo_dir)" "base_repo_dir"
+}
