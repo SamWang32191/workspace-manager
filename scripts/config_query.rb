@@ -50,6 +50,12 @@ def require_repo_names(repos, profile)
   invalid_config("profile [#{profile}] repos must contain non-empty strings")
 end
 
+def require_single_directory_repo_names(repos, profile)
+  return repos if repos.all? { |repo| repo != '.' && repo != '..' && !repo.include?('/') }
+
+  invalid_config("profile [#{profile}] repos must be single directory names")
+end
+
 def require_unique_repos(repos, profile)
   return repos if repos.uniq.length == repos.length
 
@@ -62,6 +68,7 @@ def require_profiles(profiles)
   profiles.each do |profile, repos|
     repos = require_list(repos, "profile [#{profile}] repos")
     repos = require_repo_names(repos, profile)
+    repos = require_single_directory_repo_names(repos, profile)
     require_unique_repos(repos, profile)
   end
 
@@ -91,6 +98,7 @@ when 'profile-repos'
   repos = profiles[profile]
   repos = require_list(repos, "profile [#{profile}] repos")
   repos = require_repo_names(repos, profile)
+  repos = require_single_directory_repo_names(repos, profile)
   repos = require_unique_repos(repos, profile)
   puts repos
 when 'base-repo-dir'

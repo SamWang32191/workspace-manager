@@ -74,6 +74,26 @@ assert_contains "$output" "Invalid config: profile [iris] repos must not contain
 [ ! -e "$tmp_dir/root/workspaces/dup-case" ] || fail "expected create to fail before creating workspace for duplicate repos"
 [ ! -e "$tmp_dir/repos/iris-auth/iris-auth" ] || fail "expected duplicate repo config to avoid polluting base repo dir"
 
+mkdir -p "$tmp_dir/escape"
+
+cat >"$tmp_dir/path-traversal-repos.yaml" <<EOF
+base_repo_dir: $tmp_dir/repos
+workspace_root: $tmp_dir/root/workspaces
+profiles:
+  iris:
+    - ../escape
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/path-traversal-repos.yaml" "$REPO_ROOT/bin/workspace" create traversal-case --profile iris 2>&1)"
+status=$?
+set -e
+
+assert_exit_code "$status" 1
+assert_contains "$output" "Invalid config: profile [iris] repos must be single directory names"
+[ ! -e "$tmp_dir/root/workspaces/traversal-case" ] || fail "expected create to fail before creating workspace for invalid repo names"
+[ ! -L "$tmp_dir/root/workspaces/escape" ] || fail "expected create to avoid creating symlinks outside the workspace"
+
 cat >"$tmp_dir/missing-workspace-root.yaml" <<EOF
 base_repo_dir: $tmp_dir/repos
 workspace_root: $tmp_dir/missing-root/workspaces
