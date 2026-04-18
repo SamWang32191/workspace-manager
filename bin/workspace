@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# shellcheck source=lib/common.sh
+source "$REPO_ROOT/lib/common.sh"
+# shellcheck source=lib/config.sh
+source "$REPO_ROOT/lib/config.sh"
+# shellcheck source=lib/workspace.sh
+source "$REPO_ROOT/lib/workspace.sh"
+# shellcheck source=lib/symlink.sh
+source "$REPO_ROOT/lib/symlink.sh"
+
+cmd_list_profiles() {
+  list_profiles
+}
+
+cmd_create() {
+  [ "$#" -eq 3 ] || die "Usage: workspace create <name> --profile <profile>"
+
+  local name="${1:-}"
+  local flag="${2:-}"
+  local profile="${3:-}"
+  local workspace_path
+
+  [ -n "$name" ] || die "Usage: workspace create <name> --profile <profile>"
+  [ "$flag" = "--profile" ] || die "Usage: workspace create <name> --profile <profile>"
+  [ -n "$profile" ] || die "Usage: workspace create <name> --profile <profile>"
+  ensure_valid_workspace_name "$name"
+  profile_exists "$profile" || die "Unknown profile: $profile"
+  ensure_workspace_paths_exist
+
+  workspace_path="$(workspace_path_from_name "$name")"
+  ensure_new_workspace_dir "$workspace_path"
+  write_profile_metadata "$workspace_path" "$profile"
+  ensure_profile_links "$workspace_path" "$profile"
+
+  printf 'Created workspace: %s\n' "$workspace_path"
+}
+
+cmd_sync() {
+  [ "$#" -eq 1 ] || die "Usage: workspace sync <path>"
+
+  local workspace_path="${1:-}"
+  local profile
+
+  [ -n "$workspace_path" ] || die "Usage: workspace sync <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  ensure_base_repo_dir_exists
+  ensure_profile_links "$workspace_path" "$profile"
+
+  printf 'Synced workspace: %s\n' "$workspace_path"
+}
+
+cmd_show() {
+  [ "$#" -eq 1 ] || die "Usage: workspace show <path>"
+
+  local workspace_path="${1:-}"
+  local profile
+  local repo
+
+  [ -n "$workspace_path" ] || die "Usage: workspace show <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+
+  printf 'Path: %s\n' "$workspace_path"
+  printf 'Profile: %s\n' "$profile"
+  printf 'Repos:\n'
+  while IFS= read -r repo; do
+    [ -n "$repo" ] || continue
+    printf -- '- %s\n' "$repo"
+  done < <(profile_repos "$profile")
+}
+
+cmd_doctor() {
+  [ "$#" -eq 1 ] || die "Usage: workspace doctor <path>"
+
+  local workspace_path="${1:-}"
+  local profile
+
+  [ -n "$workspace_path" ] || die "Usage: workspace doctor <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  ensure_base_repo_dir_exists
+  doctor_profile_links "$workspace_path" "$profile"
+}
+
+main() {
+  case "${1:-}" in
+    ""|help|-h|--help)
+      print_usage
+      ;;
+    list-profiles)
+      cmd_list_profiles
+      ;;
+    create)
+      shift
+      cmd_create "$@"
+      ;;
+    sync)
+      shift
+      cmd_sync "$@"
+      ;;
+    show)
+      shift
+      cmd_show "$@"
+      ;;
+    doctor)
+      shift
+      cmd_doctor "$@"
+      ;;
+    *)
+      die "Unknown command: ${1}"
+      ;;
+  esac
+}
+
+main "$@"

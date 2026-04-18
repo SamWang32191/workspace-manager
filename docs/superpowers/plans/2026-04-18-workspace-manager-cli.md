@@ -1,6 +1,6 @@
 # Workspace Manager CLI Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a Bash-first CLI that creates and syncs workspace symlinks from centrally managed YAML profiles, with per-workspace `.workspace-profile` metadata.
 
@@ -47,7 +47,7 @@
 - Create: `tests/help_test.sh`
 - Create: `Makefile`
 
-- [ ] **Step 1: Write the failing help test**
+- [x] **Step 1: Write the failing help test**
 
 Create `tests/test_helper.sh`:
 
@@ -127,7 +127,7 @@ test:
 > bash tests/help_test.sh
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -137,7 +137,7 @@ make test
 
 Expected: FAIL with `/bin/workspace` missing or not executable.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Create `lib/common.sh`:
 
@@ -198,7 +198,7 @@ Run:
 chmod +x bin/workspace tests/help_test.sh tests/test_helper.sh
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -208,7 +208,7 @@ make test
 
 Expected: PASS with `tests/help_test.sh` completing without output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Makefile bin/workspace lib/common.sh tests/test_helper.sh tests/help_test.sh
@@ -225,7 +225,7 @@ git commit -m "chore: bootstrap workspace manager cli"
 - Modify: `Makefile`
 - Create: `examples/workspaces.yaml`
 
-- [ ] **Step 1: Write the failing profile-list test**
+- [x] **Step 1: Write the failing profile-list test**
 
 Create `tests/list_profiles_test.sh`:
 
@@ -269,7 +269,7 @@ test:
 > bash tests/list_profiles_test.sh
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -279,7 +279,7 @@ make test
 
 Expected: FAIL with `Unknown command: list-profiles`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Create `scripts/config_query.rb`:
 
@@ -411,7 +411,7 @@ Run:
 chmod +x scripts/config_query.rb tests/list_profiles_test.sh
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -421,7 +421,7 @@ make test
 
 Expected: PASS with both shell tests completing without output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Makefile bin/workspace lib/config.sh scripts/config_query.rb tests/list_profiles_test.sh examples/workspaces.yaml
@@ -437,7 +437,7 @@ git commit -m "feat: add yaml-backed profile loading"
 - Create: `tests/create_workspace_test.sh`
 - Modify: `Makefile`
 
-- [ ] **Step 1: Write the failing create test**
+- [x] **Step 1: Write the failing create test**
 
 Create `tests/create_workspace_test.sh`:
 
@@ -495,7 +495,7 @@ test:
 > bash tests/create_workspace_test.sh
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -505,7 +505,7 @@ make test
 
 Expected: FAIL with `Unknown command: create`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Create `lib/workspace.sh`:
 
@@ -649,7 +649,7 @@ main() {
 main "$@"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -659,7 +659,7 @@ make test
 
 Expected: PASS with `tests/create_workspace_test.sh` completing without output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Makefile bin/workspace lib/workspace.sh lib/symlink.sh tests/create_workspace_test.sh
@@ -674,7 +674,7 @@ git commit -m "feat: add workspace creation command"
 - Create: `tests/sync_workspace_test.sh`
 - Modify: `Makefile`
 
-- [ ] **Step 1: Write the failing sync test**
+- [x] **Step 1: Write the failing sync test**
 
 Create `tests/sync_workspace_test.sh`:
 
@@ -733,7 +733,7 @@ test:
 > bash tests/sync_workspace_test.sh
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -743,7 +743,7 @@ make test
 
 Expected: FAIL with `Unknown command: sync` or `ln: ... File exists`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Update `lib/symlink.sh`:
 
@@ -870,7 +870,7 @@ main() {
 main "$@"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -880,7 +880,7 @@ make test
 
 Expected: PASS with `tests/sync_workspace_test.sh` completing without output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Makefile bin/workspace lib/symlink.sh tests/sync_workspace_test.sh
@@ -896,7 +896,7 @@ git commit -m "feat: add safe workspace sync"
 - Modify: `Makefile`
 - Modify: `README.md`
 
-- [ ] **Step 1: Write the failing show/doctor test**
+- [x] **Step 1: Write the failing show/doctor test**
 
 Create `tests/show_doctor_test.sh`:
 
@@ -959,7 +959,7 @@ test:
 > bash tests/show_doctor_test.sh
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -969,7 +969,7 @@ make test
 
 Expected: FAIL with `Unknown command: show`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Update `lib/symlink.sh`:
 
@@ -1207,7 +1207,7 @@ main() {
 main "$@"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run:
 
@@ -1217,7 +1217,7 @@ make test
 
 Expected: PASS with all five shell tests completing without output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Makefile README.md bin/workspace lib/symlink.sh tests/show_doctor_test.sh
@@ -1226,7 +1226,7 @@ git commit -m "feat: add workspace inspection commands"
 
 ## Final Verification
 
-- [ ] Run the full suite one more time:
+- [x] Run the full suite one more time:
 
 ```bash
 make test
@@ -1234,7 +1234,7 @@ make test
 
 Expected: PASS with all shell tests completing without output.
 
-- [ ] Smoke-test the example config flow locally:
+- [x] Smoke-test the example config flow locally:
 
 ```bash
 mkdir -p "$HOME/.config/workspace-manager"
@@ -1244,7 +1244,7 @@ bin/workspace list-profiles
 
 Expected: prints the example profile names in sorted order.
 
-- [ ] Manually test a real workspace against your existing repo root:
+- [x] Manually test a real workspace against your existing repo root:
 
 ```bash
 bin/workspace create demo-ticket --profile iris
