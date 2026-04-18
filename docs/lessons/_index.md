@@ -4,4 +4,5 @@
 
 | Card | Scope | Tags | Date |
 |---|---|---|---|
+| `profile-repo-names-must-be-single-directories` | project | bash, cli, config, validation, path-traversal | 2026-04-19 |
 | `inspection-commands-must-validate-arity-and-config` | feature | bash, cli, validation, config, tests | 2026-04-19 |
