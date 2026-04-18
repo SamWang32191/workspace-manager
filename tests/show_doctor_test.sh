@@ -21,7 +21,7 @@ profiles:
 EOF
 
 printf 'iris\n' >"$tmp_dir/workspaces/ticket-123/.workspace-profile"
-ln -s "$tmp_dir/repos/iris-auth" "$tmp_dir/workspaces/ticket-123/iris-auth"
+ln -s "../../repos/iris-auth" "$tmp_dir/workspaces/ticket-123/iris-auth"
 ln -s "$tmp_dir/repos/wrong-target" "$tmp_dir/workspaces/ticket-123/iris-admin-ui"
 
 show_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/workspaces.yaml" "$REPO_ROOT/bin/workspace" show "$tmp_dir/workspaces/ticket-123")"

@@ -1,6 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+resolve_existing_dir() {
+  local path="$1"
+
+  (cd "$path" 2>/dev/null && pwd -P)
+}
+
+resolve_symlink_dir_target() {
+  local path="$1"
+  local target
+
+  target="$(readlink "$path")" || return 1
+
+  if [[ "$target" = /* ]]; then
+    resolve_existing_dir "$target"
+    return
+  fi
+
+  resolve_existing_dir "$(dirname "$path")/$target"
+}
+
+symlink_points_to_dir() {
+  local path="$1"
+  local expected_target="$2"
+  local resolved_target
+  local resolved_expected
+
+  resolved_target="$(resolve_symlink_dir_target "$path")" || return 1
+  resolved_expected="$(resolve_existing_dir "$expected_target")" || return 1
+  [ "$resolved_target" = "$resolved_expected" ]
+}
+
 ensure_profile_links() {
   local workspace_path="$1"
   local profile="$2"
@@ -8,7 +39,6 @@ ensure_profile_links() {
   local base_dir
   local src
   local dst
-  local current_target
 
   base_dir="$(base_repo_dir)"
 
@@ -23,8 +53,7 @@ ensure_profile_links() {
     fi
 
     if [ -L "$dst" ]; then
-      current_target="$(readlink "$dst")"
-      if [ "$current_target" = "$src" ]; then
+      if symlink_points_to_dir "$dst" "$src"; then
         continue
       fi
       rm -f "$dst"
@@ -48,7 +77,6 @@ doctor_profile_links() {
   local base_dir
   local src
   local dst
-  local current_target
   local had_error=0
 
   base_dir="$(base_repo_dir)"
@@ -64,8 +92,7 @@ doctor_profile_links() {
     fi
 
     if [ -L "$dst" ]; then
-      current_target="$(readlink "$dst")"
-      if [ "$current_target" = "$src" ]; then
+      if symlink_points_to_dir "$dst" "$src"; then
         printf 'OK: %s\n' "$repo"
       else
         printf 'ERROR: wrong symlink target for %s\n' "$repo"
