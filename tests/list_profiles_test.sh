@@ -100,3 +100,48 @@ set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on non-list profile repos"
 assert_contains "$output" "Invalid config: profile [iris] repos must be a list"
+
+cat >"$tmp_dir/missing_base_repo_dir.yaml" <<'EOF'
+workspace_root: /tmp/workspaces
+EOF
+
+set +e
+output="$(ruby "$REPO_ROOT/scripts/config_query.rb" "$tmp_dir/missing_base_repo_dir.yaml" base-repo-dir 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected base-repo-dir to fail when key is missing"
+assert_contains "$output" "Invalid config: base_repo_dir must be a string"
+
+cat >"$tmp_dir/invalid_workspace_root_type.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root:
+  nested: nope
+EOF
+
+set +e
+output="$(ruby "$REPO_ROOT/scripts/config_query.rb" "$tmp_dir/invalid_workspace_root_type.yaml" workspace-root 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected workspace-root to fail on non-string value"
+assert_contains "$output" "Invalid config: workspace_root must be a string"
+
+cat >"$tmp_dir/null_profile_repos.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  iris:
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/null_profile_repos.yaml" bash -c 'set -euo pipefail
+REPO_ROOT="$1"
+source "$REPO_ROOT/lib/common.sh"
+source "$REPO_ROOT/lib/config.sh"
+profile_exists iris' _ "$REPO_ROOT" 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected profile_exists to fail on null profile repos"
+assert_contains "$output" "Invalid config: profile [iris] repos must be a list"
