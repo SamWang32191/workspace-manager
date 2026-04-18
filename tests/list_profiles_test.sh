@@ -203,3 +203,37 @@ set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on empty repo items"
 assert_contains "$output" "Invalid config: profile [iris] repos must contain non-empty strings"
+
+cat >"$tmp_dir/unreadable.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+EOF
+chmod 000 "$tmp_dir/unreadable.yaml"
+
+set +e
+output="$(ruby "$REPO_ROOT/scripts/config_query.rb" "$tmp_dir/unreadable.yaml" base-repo-dir 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected base-repo-dir to fail on unreadable config"
+assert_contains "$output" "Invalid config:"
+
+cat >"$tmp_dir/non_string_profile_key_for_exists.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  123:
+    - iris-auth
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/non_string_profile_key_for_exists.yaml" bash -c 'set -euo pipefail
+REPO_ROOT="$1"
+source "$REPO_ROOT/lib/common.sh"
+source "$REPO_ROOT/lib/config.sh"
+profile_exists iris' _ "$REPO_ROOT" 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected profile_exists to fail on non-string profile keys"
+assert_contains "$output" "Invalid config: profile keys must be strings"

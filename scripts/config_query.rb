@@ -9,6 +9,8 @@ def load_config(path)
   YAML.load_file(path) || {}
 rescue Psych::Exception => e
   invalid_config(e.message)
+rescue SystemCallError => e
+  invalid_config(e.message)
 end
 
 def fetch_required(config, key, message)
@@ -62,6 +64,7 @@ when 'list-profiles'
 when 'profile-repos'
   profile = ARGV.shift or abort 'missing profile'
   profiles = require_mapping(fetch_required(config, 'profiles', 'profiles must be a mapping'), 'profiles')
+  profiles = require_profile_keys(profiles)
   unless profiles.key?(profile)
     warn "unknown profile: #{profile}"
     exit 3
