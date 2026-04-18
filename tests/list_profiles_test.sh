@@ -65,7 +65,7 @@ status=$?
 set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on malformed YAML"
-assert_contains "$output" "Psych::SyntaxError"
+assert_contains "$output" "Invalid config:"
 
 cat >"$tmp_dir/invalid_profiles_type.yaml" <<'EOF'
 base_repo_dir: /tmp/repos
@@ -145,3 +145,61 @@ set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on null profile repos"
 assert_contains "$output" "Invalid config: profile [iris] repos must be a list"
+
+cat >"$tmp_dir/non_string_profile_key.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  123:
+    - iris-auth
+EOF
+
+set +e
+output="$(ruby "$REPO_ROOT/scripts/config_query.rb" "$tmp_dir/non_string_profile_key.yaml" list-profiles 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected list-profiles to fail on non-string profile keys"
+assert_contains "$output" "Invalid config: profile keys must be strings"
+
+cat >"$tmp_dir/non_string_repo_item.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  iris:
+    - iris-auth
+    - 123
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/non_string_repo_item.yaml" bash -c 'set -euo pipefail
+REPO_ROOT="$1"
+source "$REPO_ROOT/lib/common.sh"
+source "$REPO_ROOT/lib/config.sh"
+profile_exists iris' _ "$REPO_ROOT" 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected profile_exists to fail on non-string repo items"
+assert_contains "$output" "Invalid config: profile [iris] repos must contain non-empty strings"
+
+cat >"$tmp_dir/empty_repo_item.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  iris:
+    - iris-auth
+    - ""
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/empty_repo_item.yaml" bash -c 'set -euo pipefail
+REPO_ROOT="$1"
+source "$REPO_ROOT/lib/common.sh"
+source "$REPO_ROOT/lib/config.sh"
+profile_exists iris' _ "$REPO_ROOT" 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected profile_exists to fail on empty repo items"
+assert_contains "$output" "Invalid config: profile [iris] repos must contain non-empty strings"
