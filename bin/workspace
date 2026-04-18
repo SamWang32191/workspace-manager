@@ -48,6 +48,33 @@ cmd_sync() {
   printf 'Synced workspace: %s\n' "$workspace_path"
 }
 
+cmd_show() {
+  local workspace_path="${1:-}"
+  local profile
+
+  [ -n "$workspace_path" ] || die "Usage: workspace show <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+
+  printf 'Path: %s\n' "$workspace_path"
+  printf 'Profile: %s\n' "$profile"
+  printf 'Repos:\n'
+  while IFS= read -r repo; do
+    [ -n "$repo" ] || continue
+    printf -- '- %s\n' "$repo"
+  done < <(profile_repos "$profile")
+}
+
+cmd_doctor() {
+  local workspace_path="${1:-}"
+  local profile
+
+  [ -n "$workspace_path" ] || die "Usage: workspace doctor <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  doctor_profile_links "$workspace_path" "$profile"
+}
+
 main() {
   case "${1:-}" in
     ""|help|-h|--help)
@@ -63,6 +90,14 @@ main() {
     sync)
       shift
       cmd_sync "$@"
+      ;;
+    show)
+      shift
+      cmd_show "$@"
+      ;;
+    doctor)
+      shift
+      cmd_doctor "$@"
       ;;
     *)
       die "Unknown command: ${1}"
