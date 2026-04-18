@@ -41,12 +41,15 @@ cmd_create() {
 }
 
 cmd_sync() {
+  [ "$#" -eq 1 ] || die "Usage: workspace sync <path>"
+
   local workspace_path="${1:-}"
   local profile
 
   [ -n "$workspace_path" ] || die "Usage: workspace sync <path>"
   profile="$(read_profile_metadata "$workspace_path")"
   profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  ensure_workspace_paths_exist
   ensure_profile_links "$workspace_path" "$profile"
 
   printf 'Synced workspace: %s\n' "$workspace_path"

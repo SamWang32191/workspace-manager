@@ -36,3 +36,27 @@ assert_symlink_target "$tmp_dir/workspaces/ticket-123/iris-auth" "$tmp_dir/repos
 assert_symlink_target "$tmp_dir/workspaces/ticket-123/iris-admin-ui" "$tmp_dir/repos/iris-admin-ui"
 assert_symlink_target "$tmp_dir/workspaces/ticket-123/manual-extra" "$tmp_dir/repos/manual-extra"
 assert_contains "$output" "Warning: Missing repo: $tmp_dir/repos/iris-finance"
+
+cat >"$tmp_dir/missing-base-repo-dir.yaml" <<EOF
+base_repo_dir: $tmp_dir/missing-repos
+workspace_root: $tmp_dir/workspaces
+profiles:
+  iris:
+    - iris-auth
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/missing-base-repo-dir.yaml" "$REPO_ROOT/bin/workspace" sync "$tmp_dir/workspaces/ticket-123" 2>&1)"
+status=$?
+set -e
+
+assert_exit_code "$status" 1
+assert_contains "$output" "base_repo_dir"
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/workspaces.yaml" "$REPO_ROOT/bin/workspace" sync "$tmp_dir/workspaces/ticket-123" extra 2>&1)"
+status=$?
+set -e
+
+assert_exit_code "$status" 1
+assert_contains "$output" "Usage: workspace sync <path>"
