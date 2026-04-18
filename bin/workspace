@@ -8,9 +8,32 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$REPO_ROOT/lib/common.sh"
 # shellcheck source=lib/config.sh
 source "$REPO_ROOT/lib/config.sh"
+# shellcheck source=lib/workspace.sh
+source "$REPO_ROOT/lib/workspace.sh"
+# shellcheck source=lib/symlink.sh
+source "$REPO_ROOT/lib/symlink.sh"
 
 cmd_list_profiles() {
   list_profiles
+}
+
+cmd_create() {
+  local name="${1:-}"
+  local flag="${2:-}"
+  local profile="${3:-}"
+  local workspace_path
+
+  [ -n "$name" ] || die "Usage: workspace create <name> --profile <profile>"
+  [ "$flag" = "--profile" ] || die "Usage: workspace create <name> --profile <profile>"
+  [ -n "$profile" ] || die "Usage: workspace create <name> --profile <profile>"
+  profile_exists "$profile" || die "Unknown profile: $profile"
+
+  workspace_path="$(workspace_path_from_name "$name")"
+  ensure_new_workspace_dir "$workspace_path"
+  write_profile_metadata "$workspace_path" "$profile"
+  ensure_profile_links "$workspace_path" "$profile"
+
+  printf 'Created workspace: %s\n' "$workspace_path"
 }
 
 main() {
@@ -20,6 +43,10 @@ main() {
       ;;
     list-profiles)
       cmd_list_profiles
+      ;;
+    create)
+      shift
+      cmd_create "$@"
       ;;
     *)
       die "Unknown command: ${1}"
