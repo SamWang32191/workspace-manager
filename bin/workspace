@@ -6,11 +6,20 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # shellcheck source=lib/common.sh
 source "$REPO_ROOT/lib/common.sh"
+# shellcheck source=lib/config.sh
+source "$REPO_ROOT/lib/config.sh"
+
+cmd_list_profiles() {
+  list_profiles
+}
 
 main() {
   case "${1:-}" in
     ""|help|-h|--help)
       print_usage
+      ;;
+    list-profiles)
+      cmd_list_profiles
       ;;
     *)
       die "Unknown command: ${1}"
