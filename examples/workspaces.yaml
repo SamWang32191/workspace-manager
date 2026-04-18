@@ -1,0 +1,14 @@
+base_repo_dir: /Users/samwang/code/github.com/softleader
+workspace_root: /Users/samwang/tmp/Workspace
+
+profiles:
+  iris:
+    - iris-admin-ui
+    - iris-auth
+    - iris-finance
+  scins-asi-cie:
+    - scins-asi-auth
+    - scins-asi-frontend-cie
+  transglobe:
+    - kapok-auth
+    - kapok-auth-ui
