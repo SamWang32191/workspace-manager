@@ -40,6 +40,18 @@ cmd_create() {
   printf 'Created workspace: %s\n' "$workspace_path"
 }
 
+cmd_sync() {
+  local workspace_path="${1:-}"
+  local profile
+
+  [ -n "$workspace_path" ] || die "Usage: workspace sync <path>"
+  profile="$(read_profile_metadata "$workspace_path")"
+  profile_exists "$profile" || die "Unknown profile in metadata: $profile"
+  ensure_profile_links "$workspace_path" "$profile"
+
+  printf 'Synced workspace: %s\n' "$workspace_path"
+}
+
 main() {
   case "${1:-}" in
     ""|help|-h|--help)
@@ -51,6 +63,10 @@ main() {
     create)
       shift
       cmd_create "$@"
+      ;;
+    sync)
+      shift
+      cmd_sync "$@"
       ;;
     *)
       die "Unknown command: ${1}"
