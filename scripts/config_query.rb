@@ -50,6 +50,17 @@ def require_repo_names(repos, profile)
   invalid_config("profile [#{profile}] repos must contain non-empty strings")
 end
 
+def require_profiles(profiles)
+  profiles = require_profile_keys(profiles)
+
+  profiles.each do |profile, repos|
+    repos = require_list(repos, "profile [#{profile}] repos")
+    require_repo_names(repos, profile)
+  end
+
+  profiles
+end
+
 config_path = ARGV.shift or abort 'missing config path'
 command = ARGV.shift or abort 'missing command'
 
@@ -59,7 +70,7 @@ config = require_mapping(config, 'root config')
 case command
 when 'list-profiles'
   profiles = require_mapping(fetch_required(config, 'profiles', 'profiles must be a mapping'), 'profiles')
-  profiles = require_profile_keys(profiles)
+  profiles = require_profiles(profiles)
   puts profiles.keys.sort
 when 'profile-repos'
   profile = ARGV.shift or abort 'missing profile'

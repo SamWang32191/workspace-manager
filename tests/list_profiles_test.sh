@@ -237,3 +237,18 @@ set -e
 
 [ "$status" -ne 0 ] || fail "expected profile_exists to fail on non-string profile keys"
 assert_contains "$output" "Invalid config: profile keys must be strings"
+
+cat >"$tmp_dir/invalid_listed_profile.yaml" <<'EOF'
+base_repo_dir: /tmp/repos
+workspace_root: /tmp/workspaces
+profiles:
+  iris: not-a-list
+EOF
+
+set +e
+output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/invalid_listed_profile.yaml" "$REPO_ROOT/bin/workspace" list-profiles 2>&1)"
+status=$?
+set -e
+
+[ "$status" -ne 0 ] || fail "expected list-profiles to fail on invalid profile repo list"
+assert_contains "$output" "Invalid config:"
