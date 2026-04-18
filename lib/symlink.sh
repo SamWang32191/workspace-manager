@@ -8,6 +8,7 @@ ensure_profile_links() {
   local base_dir
   local src
   local dst
+  local current_target
 
   base_dir="$(base_repo_dir)"
 
@@ -21,7 +22,17 @@ ensure_profile_links() {
       continue
     fi
 
-    if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+    if [ -L "$dst" ]; then
+      current_target="$(readlink "$dst")"
+      if [ "$current_target" = "$src" ]; then
+        continue
+      fi
+      rm -f "$dst"
+      ln -s "$src" "$dst"
+      continue
+    fi
+
+    if [ -e "$dst" ]; then
       warn "Skipping existing non-symlink: $dst"
       continue
     fi
