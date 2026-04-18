@@ -40,6 +40,28 @@ assert_contains "$doctor_output" "OK: iris-auth"
 assert_contains "$doctor_output" "ERROR: wrong symlink target for iris-admin-ui"
 assert_contains "$doctor_output" "WARNING: missing repo source $tmp_dir/repos/iris-finance"
 
+mkdir -p "$tmp_dir/external/external-ticket"
+printf 'iris\n' >"$tmp_dir/external/external-ticket/.workspace-profile"
+ln -s "$tmp_dir/repos/iris-auth" "$tmp_dir/external/external-ticket/iris-auth"
+
+cat >"$tmp_dir/missing-workspace-root.yaml" <<EOF
+base_repo_dir: $tmp_dir/repos
+workspace_root: $tmp_dir/workspaces-missing
+profiles:
+  iris:
+    - iris-auth
+    - iris-admin-ui
+EOF
+
+set +e
+doctor_external_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/missing-workspace-root.yaml" "$REPO_ROOT/bin/workspace" doctor "$tmp_dir/external/external-ticket" 2>&1)"
+doctor_external_status=$?
+set -e
+
+assert_exit_code "$doctor_external_status" 1
+assert_contains "$doctor_external_output" "OK: iris-auth"
+assert_contains "$doctor_external_output" "ERROR: missing managed link for iris-admin-ui"
+
 set +e
 show_extra_output="$(WORKSPACE_MANAGER_CONFIG="$tmp_dir/workspaces.yaml" "$REPO_ROOT/bin/workspace" show "$tmp_dir/workspaces/ticket-123" extra 2>&1)"
 show_extra_status=$?

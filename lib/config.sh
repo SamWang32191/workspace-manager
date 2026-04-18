@@ -61,7 +61,15 @@ ensure_existing_directory() {
   [ -d "$path" ] || die "Invalid config: $label does not exist: $path"
 }
 
-ensure_workspace_paths_exist() {
-  ensure_existing_directory "$(workspace_root)" "workspace_root"
+ensure_base_repo_dir_exists() {
   ensure_existing_directory "$(base_repo_dir)" "base_repo_dir"
+}
+
+ensure_workspace_root_exists() {
+  ensure_existing_directory "$(workspace_root)" "workspace_root"
+}
+
+ensure_workspace_paths_exist() {
+  ensure_workspace_root_exists
+  ensure_base_repo_dir_exists
 }

@@ -49,7 +49,7 @@ cmd_sync() {
   [ -n "$workspace_path" ] || die "Usage: workspace sync <path>"
   profile="$(read_profile_metadata "$workspace_path")"
   profile_exists "$profile" || die "Unknown profile in metadata: $profile"
-  ensure_workspace_paths_exist
+  ensure_base_repo_dir_exists
   ensure_profile_links "$workspace_path" "$profile"
 
   printf 'Synced workspace: %s\n' "$workspace_path"
@@ -84,7 +84,7 @@ cmd_doctor() {
   [ -n "$workspace_path" ] || die "Usage: workspace doctor <path>"
   profile="$(read_profile_metadata "$workspace_path")"
   profile_exists "$profile" || die "Unknown profile in metadata: $profile"
-  ensure_workspace_paths_exist
+  ensure_base_repo_dir_exists
   doctor_profile_links "$workspace_path" "$profile"
 }
 
