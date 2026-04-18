@@ -22,7 +22,24 @@ list_profiles() {
 
 profile_exists() {
   local profile="$1"
-  config_query profile-repos "$profile" >/dev/null 2>&1
+  local output
+  local status
+
+  set +e
+  output="$(config_query profile-repos "$profile" 2>&1 >/dev/null)"
+  status=$?
+  set -e
+
+  if [ "$status" -eq 0 ]; then
+    return 0
+  fi
+
+  if [ "$status" -eq 3 ]; then
+    return 1
+  fi
+
+  [ -z "$output" ] || printf '%s\n' "$output" >&2
+  return "$status"
 }
 
 profile_repos() {
