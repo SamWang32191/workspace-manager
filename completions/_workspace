@@ -1,0 +1,19 @@
+#compdef workspace
+
+local -a subcommands
+subcommands=(
+  'help:Show usage information'
+  'list-profiles:List configured profiles'
+  'create:Create a managed workspace'
+  'sync:Sync an existing managed workspace'
+  'show:Show workspace details'
+  'doctor:Inspect managed workspace links'
+)
+
+_arguments '1:command:->command'
+
+case $state in
+  command)
+    _describe 'workspace command' subcommands
+    ;;
+esac

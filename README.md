@@ -27,6 +27,20 @@ Override the config path when testing or when keeping multiple configs:
 WORKSPACE_MANAGER_CONFIG=/path/to/workspaces.yaml bin/workspace list-profiles
 ```
 
+## Shell Completion
+
+### zsh
+
+To enable zsh completion for `workspace`, add this repository's `completions/` directory to `fpath`, then reload zsh completion metadata:
+
+```zsh
+fpath=("/path/to/workspace-manager/completions" $fpath)
+autoload -Uz compinit
+compinit
+```
+
+After that, `workspace <TAB>` will suggest the supported subcommands.
+
 ## Config Format
 
 The config file is YAML with three top-level keys:
